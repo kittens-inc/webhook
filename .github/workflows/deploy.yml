@@ -82,22 +82,22 @@ jobs:
           mkdir -p debug
           
           # Stop existing containers
-          docker-compose down || true
+          docker compose down || true
           
           # Build and start new containers
-          docker-compose up -d --build
+          docker compose up -d --build
           
           # Wait for health check
           echo "Waiting for application to start..."
           sleep 10
           
           # Verify deployment
-          if docker-compose ps | grep -q "Up"; then
+          if docker compose ps | grep -q "Up"; then
             echo "✅ Deployment successful!"
-            docker-compose ps
+            docker compose ps
           else
             echo "❌ Deployment failed!"
-            docker-compose logs
+            docker compose logs
             exit 1
           fi
           

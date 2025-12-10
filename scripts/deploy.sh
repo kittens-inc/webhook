@@ -48,17 +48,13 @@ if ! docker info &> /dev/null; then
 fi
 
 # Check if Docker Compose is available
-if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
-    log_error "Docker Compose is not installed. Please install Docker Compose first."
+if ! docker compose version &> /dev/null; then
+    log_error "Docker Compose is not available. Please install Docker Compose plugin."
     exit 1
 fi
 
-# Use docker compose or docker-compose based on availability
-if docker compose version &> /dev/null; then
-    DOCKER_COMPOSE="docker compose"
-else
-    DOCKER_COMPOSE="docker-compose"
-fi
+# Use docker compose (modern syntax)
+DOCKER_COMPOSE="docker compose"
 
 log_info "Starting deployment process..."
 
