@@ -1,0 +1,111 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.9.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Add VPS to known hosts
+      run: |
+        ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Deploy to VPS
+      run: |
+        ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+          # Navigate to deployment directory
+          cd /opt/webhook || { echo "Creating deployment directory"; sudo mkdir -p /opt/webhook; sudo chown $USER:$USER /opt/webhook; cd /opt/webhook; }
+          
+          # Clone or update repository
+          if [ -d ".git" ]; then
+            echo "Updating existing repository..."
+            git fetch origin
+            git reset --hard origin/main
+          else
+            echo "Cloning repository..."
+            git clone https://github.com/kittens-inc/webhook.git .
+          fi
+          
+          # Create config.toml from secrets
+          cat > config.toml << 'CONFIG_EOF'
+        [app]
+        debug = false
+        port = 3000
+
+        [github]
+        secret = "${{ secrets.WEBHOOK_SECRET }}"
+
+        [discord]
+        webhook_url = "${{ secrets.DISCORD_WEBHOOK_URL }}"
+
+        [events]
+        push = true
+        issues = true
+        workflow_run = true
+        workflow_job = true
+
+        [events_config.push]
+        show_file_changes = true
+        max_commits_shown = 5
+        show_commit_details = true
+        embed_color = 0x00ff00
+
+        [events_config.issues]
+        show_labels = true
+        show_assignees = true
+        embed_color = 0xff9900
+
+        [events_config.workflow_run]
+        show_duration = true
+        show_conclusion = true
+        embed_color = 0x0099ff
+
+        [events_config.workflow_job]
+        show_steps = false
+        show_runner = true
+        embed_color = 0x6600cc
+        CONFIG_EOF
+          
+          # Create debug directory
+          mkdir -p debug
+          
+          # Stop existing containers
+          docker-compose down || true
+          
+          # Build and start new containers
+          docker-compose up -d --build
+          
+          # Wait for health check
+          echo "Waiting for application to start..."
+          sleep 10
+          
+          # Verify deployment
+          if docker-compose ps | grep -q "Up"; then
+            echo "✅ Deployment successful!"
+            docker-compose ps
+          else
+            echo "❌ Deployment failed!"
+            docker-compose logs
+            exit 1
+          fi
+          
+          # Clean up old Docker images
+          docker image prune -f
+        EOF
+
+    - name: Verify deployment
+      run: |
+        # Optional: Add a health check endpoint test
+        echo "Deployment completed successfully!"
