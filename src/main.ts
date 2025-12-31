@@ -9,7 +9,7 @@ import { EventType } from "./types";
  * Main Webhook Server
  */
 class WebhookServer {
-  private server: any = null;
+  private server: Bun.Server<undefined> | null = null;
   private readonly secret: string;
   private readonly port: number;
 
