@@ -18,3 +18,6 @@ $ bun run src/main.ts
 $ docker build -t webhook .
 $ docker run -p 3000:3000 -v $(pwd)/config.toml:/app/config.toml webhook
 ```
+
+## Credit
+original project: https://github.com/catgir-ls/webhook
