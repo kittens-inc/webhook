@@ -1,6 +1,7 @@
 import * as TOML from "@iarna/toml";
 import { readFileSync, existsSync } from "fs";
 import type { AppConfig } from "../types";
+import { Logger } from "../utils/logger";
 
 /**
  * Configuration Manager
@@ -33,9 +34,9 @@ export class ConfigManager {
       // Validate and set defaults
       this.config = this.validateConfig(parsedConfig);
       
-      console.log(`Loaded configuration from ${configPath}`);
+      Logger.log(`Loaded configuration from ${configPath}`);
     } catch (error) {
-      console.error(`Failed to load configuration: ${error}`);
+      Logger.error(`Failed to load configuration: ${error}`);
       throw error;
     }
   }

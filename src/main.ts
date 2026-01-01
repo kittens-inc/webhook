@@ -3,13 +3,13 @@ import { Logger } from "./utils/logger";
 import { CryptoUtils } from "./utils/crypto";
 import { eventManager } from "./managers/event-manager";
 import { PushEvent, IssuesEvent, WorkflowRunEvent, WorkflowJobEvent } from "./events";
-import { EventType } from "./types";
+import { EventType, type AppConfig } from "./types";
 
 /**
  * Main Webhook Server
  */
 class WebhookServer {
-  private server: any = null;
+  private server: Bun.Server<undefined> | null = null;
   private readonly secret: string;
   private readonly port: number;
 
@@ -157,7 +157,7 @@ async function main() {
 
     // Load configuration
     await Config.load(configFile);
-    Logger.log(`Loaded ${Object.keys(Config.get()).length} configuration sections`);
+    Logger.log(`Loaded ${Object.keys(Config.get<AppConfig>()).length} configuration sections`);
 
     // Create debug directory if debug mode is enabled
     if (Config.get<boolean>("app", "debug")) {

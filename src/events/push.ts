@@ -42,28 +42,6 @@ export class PushEvent extends Event {
     const commitsToShow = commits.slice(0, config.max_commits_shown);
     const hasMoreCommits = commits.length > config.max_commits_shown;
 
-    // Build description
-    const description = [
-      `**${commits.length}** ${commits.length === 1 ? "commit" : "commits"} pushed to [\`${repository.full_name}\`](${repository.html_url}) on \`${branch}\``,
-      "",
-    ];
-
-    if (config.show_file_changes && (fileChanges.added.length > 0 || fileChanges.modified.length > 0 || fileChanges.removed.length > 0)) {
-      description.push("**File Changes:**");
-      description.push("```diff");
-      if (fileChanges.added.length > 0) {
-        description.push(`+ ${fileChanges.added.length} added`);
-      }
-      if (fileChanges.modified.length > 0) {
-        description.push(`~ ${fileChanges.modified.length} modified`);
-      }
-      if (fileChanges.removed.length > 0) {
-        description.push(`- ${fileChanges.removed.length} removed`);
-      }
-      description.push("```");
-      description.push("");
-    }
-
     // Build embed fields for commits
     const fields = [];
     if (config.show_commit_details) {

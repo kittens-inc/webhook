@@ -124,8 +124,4 @@ export class WorkflowJobEvent extends Event {
         return "completed";
     }
   }
-
-  private capitalizeFirst(str: string): string {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  }
 }
